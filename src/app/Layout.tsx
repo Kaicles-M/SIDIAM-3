@@ -1,19 +1,23 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { LogOut, Menu, X } from "lucide-react";
+import { useAuth } from "./auth/useAuth";
 import { NAV_ITEMS } from "./navigation";
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    setSidebarOpen(false);
+    navigate("/login", { replace: true });
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside
         className={`
@@ -34,20 +38,20 @@ export default function Layout() {
             </span>
           </div>
           <p className="text-xs leading-snug text-primary-foreground/45" style={{ fontFamily: "'DM Mono', monospace" }}>
-            Sistema de Diagnóstico
+            Sistema de Diagnostico
             <br />
-            em Matemática
+            em Matematica
           </p>
         </div>
 
         <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-accent/20 text-sm font-bold text-accent">
-            P
+            {user?.name.slice(0, 1).toUpperCase() ?? "P"}
           </div>
           <div className="min-w-0">
-            <div className="truncate text-xs font-semibold text-primary-foreground">Professor(a)</div>
+            <div className="truncate text-xs font-semibold text-primary-foreground">{user?.name ?? "Professor(a)"}</div>
             <div className="truncate text-xs text-primary-foreground/45" style={{ fontFamily: "'DM Mono', monospace" }}>
-              Painel pedagógico
+              {user?.schoolName ?? "Painel pedagogico"}
             </div>
           </div>
         </div>
@@ -88,8 +92,17 @@ export default function Layout() {
         </nav>
 
         <div className="border-t border-white/10 px-5 py-4">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mb-4 flex w-full items-center justify-center gap-2 border border-white/10 px-3 py-2 text-xs text-primary-foreground/70 transition-colors hover:bg-white/5 hover:text-primary-foreground"
+            style={{ fontFamily: "'DM Mono', monospace" }}
+          >
+            <LogOut size={14} />
+            Sair da sessao
+          </button>
           <p className="text-xs text-primary-foreground/25" style={{ fontFamily: "'DM Mono', monospace" }}>
-            v2.4.1 — Jun 2025
+            v2.4.1 - Jun 2025
           </p>
         </div>
       </aside>

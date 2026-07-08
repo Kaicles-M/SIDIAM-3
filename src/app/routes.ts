@@ -1,5 +1,7 @@
 import { createBrowserRouter, redirect } from "react-router-dom";
 import Layout from "./Layout";
+import { ProtectedRoute } from "./auth/ProtectedRoute";
+import { PublicOnlyRoute } from "./auth/PublicOnlyRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Avaliacoes from "./pages/Avaliacoes";
@@ -16,22 +18,27 @@ export const router = createBrowserRouter([
     loader: () => redirect("/login"),
   },
   {
-    path: "/login",
-    Component: Login,
+    Component: PublicOnlyRoute,
+    children: [{ path: "/login", Component: Login }],
   },
   {
-    path: "/",
-    Component: Layout,
+    Component: ProtectedRoute,
     children: [
-      { path: "dashboard", Component: Dashboard },
-      { path: "avaliacoes", Component: Avaliacoes },
-      { path: "turmas", Component: Turmas },
-      { path: "bncc", Component: BNCC },
-      { path: "resultados", Component: Resultados },
-      { path: "intervencoes", Component: Intervencoes },
-      { path: "relatorios", Component: Relatorios },
-      { path: "configuracoes", Component: Configuracoes },
-      { path: "*", loader: () => redirect("/dashboard") },
+      {
+        path: "/",
+        Component: Layout,
+        children: [
+          { path: "dashboard", Component: Dashboard },
+          { path: "avaliacoes", Component: Avaliacoes },
+          { path: "turmas", Component: Turmas },
+          { path: "bncc", Component: BNCC },
+          { path: "resultados", Component: Resultados },
+          { path: "intervencoes", Component: Intervencoes },
+          { path: "relatorios", Component: Relatorios },
+          { path: "configuracoes", Component: Configuracoes },
+          { path: "*", loader: () => redirect("/dashboard") },
+        ],
+      },
     ],
   },
   {

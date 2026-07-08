@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../auth/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
 
@@ -20,10 +23,16 @@ export default function Login() {
     }
 
     setCarregando(true);
-    setTimeout(() => {
+
+    try {
+      await login({ email, password: senha });
+      const nextPath = location.state?.from?.pathname ?? "/dashboard";
+      navigate(nextPath, { replace: true });
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Nao foi possivel entrar com sua conta.");
+    } finally {
       setCarregando(false);
-      navigate("/dashboard");
-    }, 900);
+    }
   }
 
   return (
@@ -51,26 +60,26 @@ export default function Login() {
 
         <div className="relative">
           <div className="mb-6 text-xs uppercase tracking-widest text-accent" style={{ fontFamily: "'DM Mono', monospace" }}>
-            Plataforma pedagógica
+            Plataforma pedagogica
           </div>
           <h1 className="mb-6 text-4xl font-bold leading-tight xl:text-5xl" style={{ fontFamily: "'Roboto Slab', serif" }}>
-            Diagnóstico
+            Diagnostico
             <br />
             preciso.
             <br />
-            <span className="text-accent">Intervenção</span>
+            <span className="text-accent">Intervencao</span>
             <br />
             eficaz.
           </h1>
           <p className="max-w-sm text-base leading-relaxed text-primary-foreground/55">
-            Identifique dificuldades de aprendizagem em matemática e planeje intervenções pedagógicas com base em dados reais das suas turmas.
+            Identifique dificuldades de aprendizagem em matematica e planeje intervencoes pedagogicas com base em dados reais das suas turmas.
           </p>
         </div>
 
         <div className="relative border-t border-white/10 pt-6">
           <div className="grid grid-cols-3 gap-6">
             {[
-              { v: "4.200+", l: "Diagnósticos" },
+              { v: "4.200+", l: "Diagnosticos" },
               { v: "98", l: "Escolas" },
               { v: "87%", l: "Taxa de melhoria" },
             ].map((s) => (
@@ -149,7 +158,7 @@ export default function Login() {
                   autoComplete="current-password"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="........"
                   className="w-full border border-border bg-card px-4 py-3 pr-11 text-sm text-foreground transition-colors placeholder:text-muted-foreground/50 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/50"
                 />
                 <button
@@ -189,6 +198,11 @@ export default function Login() {
             </button>
           </form>
 
+          <div className="mt-4 border border-border bg-card/70 px-4 py-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">Acesso inicial para homologacao</p>
+            <p className="mt-1">Use `professor@escola.edu.br` com a senha `123456`.</p>
+          </div>
+
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs text-muted-foreground" style={{ fontFamily: "'DM Mono', monospace" }}>
@@ -209,7 +223,7 @@ export default function Login() {
           </p>
 
           <p className="mt-6 text-center text-xs text-muted-foreground/40" style={{ fontFamily: "'DM Mono', monospace" }}>
-            SIDIAM v2.4.1 · Dados protegidos por LGPD
+            SIDIAM v2.4.1 - Dados protegidos por LGPD
           </p>
         </div>
       </div>
