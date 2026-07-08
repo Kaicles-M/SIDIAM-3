@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
@@ -6,16 +6,25 @@ import { useAuth } from "../auth/useAuth";
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { authError, clearAuthError, login } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
+  const [mensagemInfo, setMensagemInfo] = useState("");
   const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    if (authError) {
+      setErro(authError);
+    }
+  }, [authError]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
+    setMensagemInfo("");
+    clearAuthError();
 
     if (!email || !senha) {
       setErro("Preencha e-mail e senha para continuar.");
@@ -33,6 +42,12 @@ export default function Login() {
     } finally {
       setCarregando(false);
     }
+  }
+
+  function handleForgotPassword() {
+    setErro("");
+    clearAuthError();
+    setMensagemInfo("Recuperacao de senha sera habilitada na proxima etapa da integracao com Supabase.");
   }
 
   return (
@@ -147,7 +162,12 @@ export default function Login() {
                 >
                   Senha
                 </label>
-                <button type="button" className="text-xs text-accent hover:underline" style={{ fontFamily: "'DM Mono', monospace" }}>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-xs text-accent hover:underline"
+                  style={{ fontFamily: "'DM Mono', monospace" }}
+                >
                   Esqueceu a senha?
                 </button>
               </div>
@@ -179,6 +199,13 @@ export default function Login() {
               </div>
             )}
 
+            {mensagemInfo && (
+              <div className="flex items-start gap-2.5 border border-border bg-card px-3 py-3 text-muted-foreground">
+                <AlertCircle size={15} className="mt-0.5 flex-shrink-0" />
+                <span className="text-xs leading-snug">{mensagemInfo}</span>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={carregando}
@@ -197,11 +224,6 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          <div className="mt-4 border border-border bg-card/70 px-4 py-3 text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">Acesso inicial para homologacao</p>
-            <p className="mt-1">Use `professor@escola.edu.br` com a senha `123456`.</p>
-          </div>
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />

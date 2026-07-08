@@ -39,6 +39,7 @@
     "@radix-ui/react-toggle": "1.1.2",
     "@radix-ui/react-toggle-group": "1.1.2",
     "@radix-ui/react-tooltip": "1.1.8",
+    "@supabase/supabase-js": "^2.110.1",
     "browserslist": "^4.28.5",
     "caniuse-lite": "^1.0.30001803",
     "canvas-confetti": "1.9.4",

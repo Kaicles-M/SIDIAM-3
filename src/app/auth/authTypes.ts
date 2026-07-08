@@ -6,10 +6,6 @@ export interface AuthUser {
   schoolName: string;
 }
 
-export interface StoredAuthUser extends AuthUser {
-  password: string;
-}
-
 export interface LoginPayload {
   email: string;
   password: string;
