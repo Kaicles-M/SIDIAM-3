@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BarChart2,
@@ -12,6 +13,8 @@ import {
   CheckCircle2,
   Clock,
 } from "lucide-react";
+import { useAuth } from "../auth/useAuth";
+import { getSupabaseClient } from "../../lib/supabase";
 
 const TURMAS = [
   { nome: "8º A — Manhã", estudantes: 32, avaliados: 28, media: 61, tendencia: "up" },
@@ -55,6 +58,17 @@ function scoreBg(v: number) {
   return "rgba(192,57,43,0.12)";
 }
 
+function formatSyncDate(value?: string) {
+  if (!value) {
+    return "Aguardando sincronizacao";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
 function SeveridadeBadge({ s }: { s: string }) {
   const map: Record<string, { label: string; color: string; bg: string }> = {
     alta: { label: "Alta", color: "#c0392b", bg: "rgba(192,57,43,0.10)" },
@@ -70,6 +84,43 @@ function SeveridadeBadge({ s }: { s: string }) {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const [lastProfileSync, setLastProfileSync] = useState<string>();
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProfileSnapshot() {
+      if (!user?.id) {
+        setLastProfileSync(undefined);
+        return;
+      }
+
+      const { data, error } = await getSupabaseClient()
+        .from("profiles")
+        .select("updated_at")
+        .eq("id", user.id)
+        .maybeSingle<{ updated_at?: string }>();
+
+      if (!active) {
+        return;
+      }
+
+      if (error) {
+        setLastProfileSync(undefined);
+        return;
+      }
+
+      setLastProfileSync(data?.updated_at);
+    }
+
+    loadProfileSnapshot();
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
   return (
     <div className="flex-1 overflow-y-auto bg-background">
       <div className="flex items-center justify-between border-b border-border bg-card px-8 py-5">
@@ -79,6 +130,9 @@ export default function Dashboard() {
           </h1>
           <p className="mt-0.5 text-xs text-muted-foreground" style={{ fontFamily: "'DM Mono', monospace" }}>
             Ano letivo 2025 — 2º bimestre
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground" style={{ fontFamily: "'DM Mono', monospace" }}>
+            Supabase conectado para {user?.schoolName ?? "a sua escola"} · Perfil sincronizado em {formatSyncDate(lastProfileSync)}
           </p>
         </div>
         <Link

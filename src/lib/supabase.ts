@@ -11,8 +11,8 @@ export interface ProfileRecord {
 
 let supabaseClient: ReturnType<typeof createClient> | null = null;
 
-function getEnvVar(name: "VITE_SUPABASE_URL" | "VITE_SUPABASE_ANON_KEY") {
-  const value = import.meta.env[name];
+function getEnvVar(name: "VITE_SUPABASE_URL" | "VITE_SUPABASE_ANON_KEY", fallbackName?: "VITE_SUPABASE_PUBLISHABLE_KEY") {
+  const value = import.meta.env[name] ?? (fallbackName ? import.meta.env[fallbackName] : undefined);
   if (!value) {
     throw new Error("As variaveis do Supabase nao foram configuradas. Preencha o arquivo .env antes de entrar.");
   }
@@ -21,7 +21,10 @@ function getEnvVar(name: "VITE_SUPABASE_URL" | "VITE_SUPABASE_ANON_KEY") {
 
 export function getSupabaseClient() {
   if (!supabaseClient) {
-    supabaseClient = createClient(getEnvVar("VITE_SUPABASE_URL"), getEnvVar("VITE_SUPABASE_ANON_KEY"));
+    supabaseClient = createClient(
+      getEnvVar("VITE_SUPABASE_URL"),
+      getEnvVar("VITE_SUPABASE_ANON_KEY", "VITE_SUPABASE_PUBLISHABLE_KEY"),
+    );
   }
 
   return supabaseClient;
