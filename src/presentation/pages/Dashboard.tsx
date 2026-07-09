@@ -13,8 +13,8 @@ import {
   CheckCircle2,
   Clock,
 } from "lucide-react";
-import { useAuth } from "../auth/useAuth";
-import { getSupabaseClient } from "../../lib/supabase";
+import { useAuth } from "../hooks/useAuth";
+import { getProfileSyncDateUseCase } from "../../di";
 
 const TURMAS = [
   { nome: "8º A — Manhã", estudantes: 32, avaliados: 28, media: 61, tendencia: "up" },
@@ -96,22 +96,16 @@ export default function Dashboard() {
         return;
       }
 
-      const { data, error } = await getSupabaseClient()
-        .from("profiles")
-        .select("updated_at")
-        .eq("id", user.id)
-        .maybeSingle<{ updated_at?: string }>();
-
-      if (!active) {
-        return;
+      try {
+        const syncDate = await getProfileSyncDateUseCase.execute(user.id);
+        if (active) {
+          setLastProfileSync(syncDate);
+        }
+      } catch {
+        if (active) {
+          setLastProfileSync(undefined);
+        }
       }
-
-      if (error) {
-        setLastProfileSync(undefined);
-        return;
-      }
-
-      setLastProfileSync(data?.updated_at);
     }
 
     loadProfileSnapshot();

@@ -1,7 +1,7 @@
 import { createBrowserRouter, redirect } from "react-router-dom";
 import Layout from "./Layout";
-import { ProtectedRoute } from "./auth/ProtectedRoute";
-import { PublicOnlyRoute } from "./auth/PublicOnlyRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { PublicOnlyRoute } from "./components/PublicOnlyRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Avaliacoes from "./pages/Avaliacoes";

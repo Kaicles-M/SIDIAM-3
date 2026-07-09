@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LogOut, Menu, X } from "lucide-react";
-import { useAuth } from "./auth/useAuth";
+import { useAuth } from "./hooks/useAuth";
 import { NAV_ITEMS } from "./navigation";
 
 export default function Layout() {

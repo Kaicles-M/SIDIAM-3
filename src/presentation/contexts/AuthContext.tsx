@@ -1,6 +1,11 @@
 import { createContext, useEffect, useMemo, useState } from "react";
-import * as authService from "./authService";
-import type { AuthUser, LoginPayload } from "./authTypes";
+import type { AuthUser, LoginPayload } from "../../domain/entities/AuthUser";
+import {
+  loginUseCase,
+  logoutUseCase,
+  getCurrentUserUseCase,
+  subscribeToAuthChangesUseCase,
+} from "../../di";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -25,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function loadSession() {
       try {
-        const sessionUser = await authService.getCurrentUser();
+        const sessionUser = await getCurrentUserUseCase.execute();
         if (active) {
           setUser(sessionUser);
           setAuthError(null);
@@ -45,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadSession();
 
     try {
-      unsubscribe = authService.onAuthStateChange((nextUser, errorMessage) => {
+      unsubscribe = subscribeToAuthChangesUseCase.execute((nextUser, errorMessage) => {
         if (!active) {
           return;
         }
@@ -69,12 +74,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(payload: LoginPayload) {
     setAuthError(null);
-    const sessionUser = await authService.signIn(payload);
+    const sessionUser = await loginUseCase.execute(payload);
     setUser(sessionUser);
   }
 
   async function logout() {
-    await authService.signOut();
+    await logoutUseCase.execute();
     setUser(null);
     setAuthError(null);
   }
@@ -98,3 +103,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+

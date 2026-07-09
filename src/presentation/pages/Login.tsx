@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../auth/useAuth";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
